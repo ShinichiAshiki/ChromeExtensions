@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "YouTube Layout Swapper",
+    "version": "1.0.0",
+    "description": "YouTubeの動画ページで関連動画を下・コメントを右に移動",
+    "icons": {
+        "16": "assets/icon.png",
+        "48": "assets/icon.png",
+        "128": "assets/icon.png"
+    },
+    "permissions": [
+        "scripting",
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://www.youtube.com/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.youtube.com/*"
+            ],
+            "js": [
+                "content/content.js"
+            ],
+            "css": [
+                "content/content.css"
+            ]
+        }
+    ]
+}
