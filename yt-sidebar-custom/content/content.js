@@ -13,8 +13,8 @@ function getElements() {
 
 // 生放送判定
 function isLiveVideo() {
-  const player = document.querySelector('#ytd-player');
-  return !!player?.querySelector('.ytp-live');
+  const player = document.querySelector("#ytd-player");
+  return !!player?.querySelector(".ytp-live");
 }
 
 // タブ化処理
@@ -44,6 +44,9 @@ function applyTabs() {
 
   if (tabs.length === 0) return false;
 
+  // 既存のタブ削除（SPA遷移時の残骸を消す）
+  resetTabs();
+
   // タブバー作成
   const tabBar = document.createElement("div");
   tabBar.id = "yt-sidebar-tabs";
@@ -71,8 +74,8 @@ function applyTabs() {
     wrapper.appendChild(tab.el);
 
     tabBtn.addEventListener("click", () => {
-      document.querySelectorAll(".yt-tab-content").forEach(c => c.style.display = "none");
-      document.querySelectorAll("#yt-sidebar-tabs button").forEach(b => b.style.background = "#fff");
+      document.querySelectorAll(".yt-tab-content").forEach(c => (c.style.display = "none"));
+      document.querySelectorAll("#yt-sidebar-tabs button").forEach(b => (b.style.background = "#fff"));
       wrapper.style.display = "block";
       tabBtn.style.background = "#ddd";
     });
@@ -89,14 +92,31 @@ function applyTabs() {
   return true;
 }
 
-// 元に戻す処理(TODO:検討)
+// 元に戻す処理
 function resetTabs() {
-  console.log("resetTabs");
-  if (!STATE.applied) return;
-  const { secondary } = getElements();
+  console.log("resetTabs:", STATE.applied);
+  const { secondary, primary } = getElements();
   if (!secondary) return;
 
-  secondary.innerHTML = "";
+  const contentContainer = secondary.querySelector("#yt-sidebar-contents");
+
+  // 子要素を元に戻す
+  if (contentContainer) {
+    const moved = contentContainer.querySelectorAll("#related, #playlist, #chat, #comments");
+    moved.forEach(el => {
+      if (el.id === "comments") {
+        primary.appendChild(el); // コメントは primary 内
+      } else {
+        secondary.appendChild(el); // 他は secondary に戻す
+      }
+    });
+    contentContainer.remove();
+  }
+
+  // タブバー削除
+  const tabBar = secondary.querySelector("#yt-sidebar-tabs");
+  if (tabBar) tabBar.remove();
+
   STATE.applied = false;
 }
 
@@ -112,7 +132,7 @@ function tryApplyForAWhile() {
 
 // SPA遷移対応
 window.addEventListener("yt-navigate-start", () => {
-  console.log("SPA start resetSwap");
+  console.log("SPA start resetTabs");
   resetTabs();
 });
 window.addEventListener("yt-navigate-finish", () => {
