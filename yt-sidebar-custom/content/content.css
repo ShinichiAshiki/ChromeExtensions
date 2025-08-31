@@ -1,0 +1,9 @@
+#yt-sidebar-contents #related,
+#yt-sidebar-contents #comments {
+    /* 画面いっぱいで止まる */
+    max-height: 100vh;
+    /* コメント欄だけスクロール */
+    overflow-y: auto;
+    /* スクロールが親に波及しない */
+    overscroll-behavior: contain;
+}
