@@ -4,7 +4,7 @@ const STATE = { applied: false };
 function getElements() {
   const primary = document.querySelector("#primary-inner");
   const secondary = document.querySelector("#secondary-inner");
-  const related = secondary ? secondary.querySelector("#related") : null;
+  const related = secondary ? secondary.querySelector("#related.style-scope.ytd-watch-flexy") : null;
   const playlist = secondary ? secondary.querySelector("#playlist") : null;
   const chat = secondary ? secondary.querySelector("#chat") : null;
   const comments = primary ? primary.querySelector("#comments") : null;
@@ -13,13 +13,12 @@ function getElements() {
 
 // 生放送判定
 function isLiveVideo() {
-  const player = document.querySelector("#ytd-player");
-  return !!player?.querySelector(".ytp-live");
+  const player = document.querySelector('#ytd-player');
+  return !!player?.querySelector('.ytp-live');
 }
 
 // タブ化処理
 function applyTabs() {
-  console.log("applyTabs");
   if (STATE.applied) return false;
   if (!window.location.href.includes("/watch")) return false;
 
@@ -29,13 +28,10 @@ function applyTabs() {
   // タブ対象を決定
   const tabs = [];
   const live = isLiveVideo();
-  console.log("isLiveVideo:", live);
   if (live) {
-    // 生放送中 → liveチャット固定、下に関連・プレイリスト
     if (related) tabs.push({ el: related, name: "関連動画" });
     if (playlist) tabs.push({ el: playlist, name: "プレイリスト" });
   } else {
-    // 通常動画・アーカイブ → コメントもタブ化
     if (related) tabs.push({ el: related, name: "関連動画" });
     if (comments) tabs.push({ el: comments, name: "コメント" });
     if (chat) tabs.push({ el: chat, name: "チャット" });
@@ -43,9 +39,6 @@ function applyTabs() {
   }
 
   if (tabs.length === 0) return false;
-
-  // 既存のタブ削除（SPA遷移時の残骸を消す）
-  resetTabs();
 
   // タブバー作成
   const tabBar = document.createElement("div");
@@ -74,8 +67,8 @@ function applyTabs() {
     wrapper.appendChild(tab.el);
 
     tabBtn.addEventListener("click", () => {
-      document.querySelectorAll(".yt-tab-content").forEach(c => (c.style.display = "none"));
-      document.querySelectorAll("#yt-sidebar-tabs button").forEach(b => (b.style.background = "#fff"));
+      document.querySelectorAll(".yt-tab-content").forEach(c => c.style.display = "none");
+      document.querySelectorAll("#yt-sidebar-tabs button").forEach(b => b.style.background = "#fff");
       wrapper.style.display = "block";
       tabBtn.style.background = "#ddd";
     });
@@ -84,7 +77,7 @@ function applyTabs() {
     contentContainer.appendChild(wrapper);
   });
 
-  // secondary にタブをセット
+  // secondary の子にタブをセット
   secondary.appendChild(tabBar);
   secondary.appendChild(contentContainer);
 
@@ -94,10 +87,11 @@ function applyTabs() {
 
 // 元に戻す処理
 function resetTabs() {
-  console.log("resetTabs:", STATE.applied);
+  if (!STATE.applied) return;
   const { secondary, primary } = getElements();
   if (!secondary) return;
 
+  const tabBar = secondary.querySelector("#yt-sidebar-tabs");
   const contentContainer = secondary.querySelector("#yt-sidebar-contents");
 
   // 子要素を元に戻す
@@ -105,43 +99,38 @@ function resetTabs() {
     const moved = contentContainer.querySelectorAll("#related, #playlist, #chat, #comments");
     moved.forEach(el => {
       if (el.id === "comments") {
-        primary.appendChild(el); // コメントは primary 内
+        primary.appendChild(el);
       } else {
-        secondary.appendChild(el); // 他は secondary に戻す
+        secondary.appendChild(el);
       }
     });
-    contentContainer.remove();
   }
 
-  // タブバー削除
-  const tabBar = secondary.querySelector("#yt-sidebar-tabs");
+  // タブバー・コンテンツ削除
   if (tabBar) tabBar.remove();
+  if (contentContainer) contentContainer.remove();
 
   STATE.applied = false;
 }
 
-// コメント出現までポーリング
+// ポーリング
 function tryApplyForAWhile() {
-  console.log("tryApplyForAWhile");
   let tries = 0;
   const max = 50;
   const timer = setInterval(() => {
-    if (applyTabs() || ++tries >= max) clearInterval(timer);
+    if (applyTabs() || ++tries >= max || STATE.applied) clearInterval(timer);
   }, 1000);
 }
 
 // SPA遷移対応
 window.addEventListener("yt-navigate-start", () => {
-  console.log("SPA start resetTabs");
   resetTabs();
 });
 window.addEventListener("yt-navigate-finish", () => {
-  console.log("SPA finish tryApplyForAWhile");
   if (window.location.href.includes("/watch")) tryApplyForAWhile();
 });
 
 // 初回適用
 if (window.location.href.includes("/watch")) {
-  console.log("初回適用");
   tryApplyForAWhile();
 }
