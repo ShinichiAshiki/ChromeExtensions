@@ -1,4 +1,3 @@
-console.log("run content.js");
 const STATE = { applied: false };
 
 // DOM要素取得
@@ -12,19 +11,36 @@ function getElements() {
   return { primary, secondary, related, playlist, chat, comments };
 }
 
+// 生放送判定
+function isLiveVideo() {
+  const player = document.querySelector('#ytd-player');
+  return !!player?.querySelector('.ytp-live');
+}
+
 // タブ化処理
 function applyTabs() {
+  console.log("applyTabs");
   if (STATE.applied) return false;
   if (!window.location.href.includes("/watch")) return false;
 
   const { primary, secondary, related, playlist, chat, comments } = getElements();
   if (!primary || !secondary) return false;
 
+  // タブ対象を決定
   const tabs = [];
-  if (related) tabs.push({ el: related, name: "関連動画" });
-  if (comments) tabs.push({ el: comments, name: "コメント" });
-  if (chat) tabs.push({ el: chat, name: "チャット" });
-  if (playlist) tabs.push({ el: playlist, name: "プレイリスト" });
+  const live = isLiveVideo();
+  console.log("isLiveVideo:", live);
+  if (live) {
+    // 生放送中 → liveチャット固定、下に関連・プレイリスト
+    if (related) tabs.push({ el: related, name: "関連動画" });
+    if (playlist) tabs.push({ el: playlist, name: "プレイリスト" });
+  } else {
+    // 通常動画・アーカイブ → コメントもタブ化
+    if (related) tabs.push({ el: related, name: "関連動画" });
+    if (comments) tabs.push({ el: comments, name: "コメント" });
+    if (chat) tabs.push({ el: chat, name: "チャット" });
+    if (playlist) tabs.push({ el: playlist, name: "プレイリスト" });
+  }
 
   if (tabs.length === 0) return false;
 
@@ -49,6 +65,9 @@ function applyTabs() {
     const wrapper = document.createElement("div");
     wrapper.className = "yt-tab-content";
     wrapper.style.display = i === 0 ? "block" : "none";
+    wrapper.style.maxHeight = "100vh";
+    wrapper.style.overflowY = "auto";
+    wrapper.style.overscrollBehavior = "contain";
     wrapper.appendChild(tab.el);
 
     tabBtn.addEventListener("click", () => {
@@ -62,7 +81,7 @@ function applyTabs() {
     contentContainer.appendChild(wrapper);
   });
 
-  secondary.innerHTML = "";
+  // secondary にタブをセット
   secondary.appendChild(tabBar);
   secondary.appendChild(contentContainer);
 
@@ -70,19 +89,39 @@ function applyTabs() {
   return true;
 }
 
+// 元に戻す処理(TODO:検討)
+function resetTabs() {
+  console.log("resetTabs");
+  if (!STATE.applied) return;
+  const { secondary } = getElements();
+  if (!secondary) return;
+
+  secondary.innerHTML = "";
+  STATE.applied = false;
+}
+
 // コメント出現までポーリング
-function tryApplyForAWhile(maxTries = 50, interval = 1000) {
+function tryApplyForAWhile() {
+  console.log("tryApplyForAWhile");
   let tries = 0;
+  const max = 50;
   const timer = setInterval(() => {
-    if (applyTabs() || ++tries >= maxTries) clearInterval(timer);
-  }, interval);
+    if (applyTabs() || ++tries >= max) clearInterval(timer);
+  }, 1000);
 }
 
 // SPA遷移対応
-window.addEventListener("yt-navigate-start", () => { STATE.applied = false; });
+window.addEventListener("yt-navigate-start", () => {
+  console.log("SPA start resetSwap");
+  resetTabs();
+});
 window.addEventListener("yt-navigate-finish", () => {
+  console.log("SPA finish tryApplyForAWhile");
   if (window.location.href.includes("/watch")) tryApplyForAWhile();
 });
 
 // 初回適用
-if (window.location.href.includes("/watch")) tryApplyForAWhile();
+if (window.location.href.includes("/watch")) {
+  console.log("初回適用");
+  tryApplyForAWhile();
+}
