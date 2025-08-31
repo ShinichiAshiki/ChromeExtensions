@@ -1,4 +1,3 @@
-console.log("run content.js");
 const STATE = { applied: false };
 
 // DOM要素を取得
@@ -12,7 +11,6 @@ function getElements() {
 
 // レイアウト入れ替え
 function applySwap() {
-  console.log("applySwap");
   if (STATE.applied) return false;
   if (!window.location.href.includes("/watch")) return false;
 
@@ -28,7 +26,6 @@ function applySwap() {
 
 // リセット処理
 function resetSwap() {
-  console.log("resetSwap");
   if (!STATE.applied) return;
   const { primary, secondary, related, comments } = getElements();
   if (!primary || !secondary || !related || !comments) return false;
@@ -41,7 +38,6 @@ function resetSwap() {
 
 // ページ適用関数（最大5秒ポーリング）
 function tryApplyForAWhile() {
-  console.log("tryApplyForAWhile");
   let tries = 0;
   const max = 50;
   const timer = setInterval(() => {
@@ -51,19 +47,14 @@ function tryApplyForAWhile() {
 
 // SPA遷移対応
 window.addEventListener("yt-navigate-start", () => {
-  console.log("SPA start resetSwap")
   resetSwap();
 });
 
 window.addEventListener("yt-navigate-finish", () => {
-  console.log("SPA finish tryApplyForAWhile")
-  if (window.location.href.includes("/watch")) {
-    tryApplyForAWhile();
-  }
+  if (window.location.href.includes("/watch")) tryApplyForAWhile();
 });
 
 // 初回適用（/watch* ページの場合）
 if (window.location.href.includes("/watch")) {
-  console.log("初回適用")
   tryApplyForAWhile();
 }
