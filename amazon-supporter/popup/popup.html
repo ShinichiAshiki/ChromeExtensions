@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Amazon フィルター</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            width: 220px;
+            padding: 10px;
+        }
+
+        label {
+            display: block;
+            margin: 6px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Amazon フィルター</h3>
+    <label><input type="checkbox" id="emi"> Amazon直販商品のみ</label>
+    <label><input type="checkbox" id="half"> 半額以下</label>
+    <label><input type="checkbox" id="deal"> セールのみ</label>
+    <label><input type="checkbox" id="timedeal"> タイムセール商品のみ</label>
+    <button id="apply">適用</button>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "Amazon Supporter",
+    "version": "1.0.0",
+    "description": "Amazonの検索結果に便利なパラメータを追加し、サクラチェッカーリンクも表示する拡張機能",
+    "icons": {
+        "16": "assets/icon.png",
+        "48": "assets/icon.png",
+        "128": "assets/icon.png"
+    },
+    "permissions": [
+        "tabs",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "https://www.amazon.co.jp/*"
+    ],
+    "action": {
+        "default_popup": "popup/popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.amazon.co.jp/*"
+            ],
+            "js": [
+                "content/content.js"
+            ]
+        }
+    ]
+}
