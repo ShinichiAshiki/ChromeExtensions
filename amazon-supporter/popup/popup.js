@@ -44,7 +44,6 @@ document.getElementById("apply").addEventListener("click", async () => {
         deal: document.getElementById("deal").checked,
         timedeal: document.getElementById("timedeal").checked
     };
-    console.log(filters);
     // 保存
     chrome.storage.local.set({ filters });
 

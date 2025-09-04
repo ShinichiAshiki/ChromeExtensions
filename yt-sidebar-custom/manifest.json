@@ -4,6 +4,7 @@
     "version": "1.0.0",
     "description": "YouTubeのサイドバーをタブ化して、関連動画・コメント・チャット・プレイリストを切り替えられるようにします。",
     "icons": {
+        "16": "assets/icon.png",
         "48": "assets/icon.png",
         "128": "assets/icon.png"
     },
