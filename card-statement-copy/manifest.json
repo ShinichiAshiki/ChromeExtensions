@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "card statement copy",
+    "version": "1.0.0",
+    "description": "楽天カードの明細ページで明細をコピー",
+    "host_permissions": [
+        "https://www.rakuten-card.co.jp/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.rakuten-card.co.jp/e-navi/members/statement/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}
