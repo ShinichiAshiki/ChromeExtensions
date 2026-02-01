@@ -19,7 +19,7 @@
 
   document.body.appendChild(btn);
 
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", async () => {
     const rows = document.querySelectorAll(".stmt-payment-lists__i");
     const lines = [];
 
@@ -39,5 +39,14 @@
     });
 
     const tsv = lines.join("\n");
+
+    try {
+      await navigator.clipboard.writeText(tsv);
+      btn.textContent = "コピーしました！";
+      setTimeout(() => (btn.textContent = "TSVコピー"), 1500);
+    } catch (e) {
+      console.error("クリップボードコピーに失敗:", e);
+      alert("コピーに失敗しました");
+    }
   });
 })();
