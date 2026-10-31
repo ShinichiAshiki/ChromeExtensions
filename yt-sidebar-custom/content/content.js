@@ -1,4 +1,4 @@
-const STATE = { applied: false };
+const STATE = { applied: false, resizeHandler: null };
 
 // DOM要素取得
 function getElements() {
@@ -95,6 +95,7 @@ function applyTabs() {
   // コンテンツ領域
   const contentContainer = document.createElement("div");
   contentContainer.id = "yt-sidebar-contents";
+  const heightLimitedWrappers = [];
 
   tabs.forEach((tab, index) => {
     const tabBtn = document.createElement("button");
@@ -108,6 +109,10 @@ function applyTabs() {
 
     const wrapper = document.createElement("div");
     wrapper.className = "yt-tab-content";
+
+    if (tab.el === related || tab.el === comments) {
+      heightLimitedWrappers.push(wrapper);
+    }
 
     if (tab.isChat) {
       wrapper.style.display = "none";
@@ -137,6 +142,9 @@ function applyTabs() {
       } else {
         hideChat();
         wrapper.style.display = "block";
+        if (heightLimitedWrappers.includes(wrapper)) {
+          STATE.resizeHandler?.();
+        }
       }
 
       tabBtn.style.background = "#ddd";
@@ -150,6 +158,26 @@ function applyTabs() {
   secondary.prepend(contentContainer);
   secondary.prepend(tabBar);
 
+  if (heightLimitedWrappers.length > 0) {
+    STATE.resizeHandler = () => {
+      const availableHeight = Math.max(
+        0,
+        window.innerHeight - contentContainer.getBoundingClientRect().top
+      );
+
+      heightLimitedWrappers.forEach(wrapper => {
+        wrapper.style.maxHeight = `${availableHeight}px`;
+        wrapper.style.setProperty(
+          "--yt-sidebar-available-height",
+          `${availableHeight}px`
+        );
+      });
+    };
+
+    STATE.resizeHandler();
+    window.addEventListener("resize", STATE.resizeHandler);
+  }
+
   hideChat();
 
   STATE.applied = true;
@@ -159,6 +187,11 @@ function applyTabs() {
 // 元に戻す処理
 function resetTabs() {
   if (!STATE.applied) return;
+
+  if (STATE.resizeHandler) {
+    window.removeEventListener("resize", STATE.resizeHandler);
+    STATE.resizeHandler = null;
+  }
 
   const { secondary, primary } = getElements();
   if (!secondary) return;
