@@ -89,29 +89,25 @@ function applyTabs() {
   // タブバー
   const tabBar = document.createElement("div");
   tabBar.id = "yt-sidebar-tabs";
-  tabBar.style.display = "flex";
-  tabBar.style.borderBottom = "1px solid #ccc";
 
   // コンテンツ領域
   const contentContainer = document.createElement("div");
   contentContainer.id = "yt-sidebar-contents";
-  const heightLimitedWrappers = [];
+  const heightLimitedWrappers = new Set();
 
   tabs.forEach((tab, index) => {
     const tabBtn = document.createElement("button");
 
     tabBtn.textContent = tab.name;
-    tabBtn.style.flex = "1";
-    tabBtn.style.padding = "5px";
-    tabBtn.style.cursor = "pointer";
-    tabBtn.style.border = "none";
-    tabBtn.style.background = index === 0 ? "#ddd" : "#fff";
+    if (index === 0) {
+      tabBtn.classList.add("is-active");
+    }
 
     const wrapper = document.createElement("div");
     wrapper.className = "yt-tab-content";
 
     if (tab.el === related || tab.el === comments) {
-      heightLimitedWrappers.push(wrapper);
+      heightLimitedWrappers.add(wrapper);
     }
 
     if (tab.isChat) {
@@ -120,34 +116,30 @@ function applyTabs() {
       wrapper.style.display = index === 0 ? "block" : "none";
     }
 
-    wrapper.style.maxHeight = "100vh";
-    wrapper.style.overflowY = "auto";
-    wrapper.style.overscrollBehavior = "contain";
-
     if (tab.el) {
       wrapper.appendChild(tab.el);
     }
 
     tabBtn.addEventListener("click", () => {
-      document
+      contentContainer
         .querySelectorAll(".yt-tab-content")
         .forEach(el => (el.style.display = "none"));
 
-      document
-        .querySelectorAll("#yt-sidebar-tabs button")
-        .forEach(el => (el.style.background = "#fff"));
+      tabBar
+        .querySelectorAll("button")
+        .forEach(el => el.classList.remove("is-active"));
 
       if (tab.isChat) {
         showChat();
       } else {
         hideChat();
         wrapper.style.display = "block";
-        if (heightLimitedWrappers.includes(wrapper)) {
+        if (heightLimitedWrappers.has(wrapper)) {
           STATE.resizeHandler?.();
         }
       }
 
-      tabBtn.style.background = "#ddd";
+      tabBtn.classList.add("is-active");
     });
 
     tabBar.appendChild(tabBtn);
@@ -158,7 +150,7 @@ function applyTabs() {
   secondary.prepend(contentContainer);
   secondary.prepend(tabBar);
 
-  if (heightLimitedWrappers.length > 0) {
+  if (heightLimitedWrappers.size > 0) {
     STATE.resizeHandler = () => {
       const availableHeight = Math.max(
         0,

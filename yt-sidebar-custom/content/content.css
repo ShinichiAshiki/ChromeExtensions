@@ -1,3 +1,26 @@
+#yt-sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+
+#yt-sidebar-tabs button {
+    flex: 1;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    background: #fff;
+}
+
+#yt-sidebar-tabs button.is-active {
+    background: #ddd;
+}
+
+.yt-tab-content {
+    max-height: 100vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
 #yt-sidebar-contents #related,
 #yt-sidebar-contents #comments {
     /* 画面いっぱいで止まる */
